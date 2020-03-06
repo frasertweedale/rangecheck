@@ -1,0 +1,14 @@
+Usage
+-----
+
+```
+runhaskell Main FILE ...
+```
+
+Where FILE is any number of `CS.cfg` files.
+
+
+Dependencies
+------------
+
+- mtl, text, filepath, safe
