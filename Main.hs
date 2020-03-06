@@ -14,7 +14,7 @@
 -- You should have received a copy of the GNU Affero General Public License
 -- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import Control.Monad (join)
+import Control.Monad (join, when)
 import Data.Foldable (for_, traverse_)
 import Data.Function (on)
 import Data.List (groupBy, sort)
@@ -38,17 +38,17 @@ main = do
 analyseRanges :: [(RangeType, AnnotatedRange String)] -> IO ()
 analyseRanges [] = pure ()
 analyseRanges xs = do
-  putStrLn $ "RANGE TYPE: " <> show (fst (head xs))
+  putStr $ "RANGE TYPE: " <> show (fst (head xs)) <> "\n\n"
   flip evalStateT (0, 0) . for_ xs $ \(_, range@((lo, hi), ann)) -> do
     liftIO $ print range
     (lastLo, lastHi) <- get
-    if lo <= lastHi
-    then do
+    put (lo, hi)
+    when (lo <= lastHi) $ do
       liftIO $ putStrLn "  RANGE OVERLAP!"
       put (min lastLo lo, max lastHi hi)
-    else
-      put (lo, hi)
-
+    when (hi <= lo) $
+      liftIO $ putStrLn "  EMPTY RANGE!"
+  putStr "\n\n"
   
 extractRangesFromFile :: FilePath -> IO [(RangeType, AnnotatedRange String)]
 extractRangesFromFile fp = do
